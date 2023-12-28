@@ -85,10 +85,10 @@ const dataObj = JSON.parse(data); //turns json file to object
 
 //specify stuff that will be called with every request, ASYNCHRONOUSLY:
 const server = http.createServer((request, resp) => {
-  const pathName = request.url;
+  const { query, pathname } = url.parse(request.url, true);
 
   //Building overview page:
-  if (pathName === `/` || pathName === `/overview`) {
+  if (pathname === `/` || pathname === `/overview`) {
     resp.writeHead(200, { "Content-type": `text/html` });
     const cardsHtml = dataObj
       .map((el) => replaceTemplate(tempCard, el))
@@ -99,12 +99,15 @@ const server = http.createServer((request, resp) => {
     resp.end(output);
   }
   //Building product page:
-  else if (pathName === `/product`) {
+  else if (pathname === `/product`) {
+    const product = dataObj[query.id];
+    const output = replaceTemplate(tempProduct, product);
+
     resp.writeHead(200, { "Content-type": `text/html` });
-    resp.end(tempProduct);
+    resp.end(output);
   }
   //API:
-  else if (pathName === `/api`) {
+  else if (pathname === `/api`) {
     resp.writeHead(200, { "Content-type": `application/json` });
     resp.end(data);
   }
