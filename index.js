@@ -3,6 +3,9 @@ const http = require(`http`); //creating http server
 const { json } = require("stream/consumers");
 const url = require(`url`); //creating http server
 
+//import modules:
+const slugify = require(`slugify`); //the last part of a url that identifies the resourse the website is displaying
+const replaceTemplate = require("./1-node-farm/modules/replaceTemplate");
 /////////////////////////////////////
 
 //SYNCHROMOUS blocking way
@@ -46,24 +49,6 @@ const url = require(`url`); //creating http server
 //SERVER
 
 //Create server and response
-
-const replaceTemplate = function (temp, product) {
-  //  /{%PRODUCTNAME%}/g means global so ALL these will be replacsed not only the 1st one.
-  let output = temp.replace(/{%PRODUCTNAME%}/g, product.productName);
-  output = output.replace(/{%FROM%}/g, product.from);
-  output = output.replace(/{%ID%}/g, product.id);
-  output = output.replace(/{%IMAGE%}/g, product.image);
-  output = output.replace(/{%NUTRIENTS%}/g, product.nutrients);
-  output = output.replace(/{%QUANTITY%}/g, product.quantity);
-  output = output.replace(/{%PRICE%}/g, product.price);
-  output = output.replace(/{%DESCRIPTION%}/g, product.description);
-
-  if (!product.organic)
-    output = output.replace(/{%NOT_ORGANIC%}/g, `not-organic`);
-
-  return output;
-};
-
 //specify requests that should be done ONCE (will be loaded in the begining and then reused), SYNCHRONOUSLY:
 const tempOverview = fs.readFileSync(
   `./1-node-farm/templates/template-overview.html`,
@@ -80,6 +65,8 @@ const tempProduct = fs.readFileSync(
 
 const data = fs.readFileSync(`./1-node-farm/dev-data/data.json`, `utf-8`);
 const dataObj = JSON.parse(data); //turns json file to object
+
+const slugs = dataObj.map((el) => slugify(el.productName, { lower: true }));
 
 //////////////////////
 
@@ -126,9 +113,3 @@ const server = http.createServer((request, resp) => {
 server.listen(5500, `127.0.0.1`, () => {
   console.log(`start listening`);
 });
-
-//*-----------------------------------------Lesson 12
-
-//ROUTING
-
-//*-----------------------------------------Lesson 13
